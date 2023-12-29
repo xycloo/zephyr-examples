@@ -1,5 +1,4 @@
-use rs_zephyr_sdk::EnvClient;
-
+use rs_zephyr_sdk::{log, EnvClient, SdkError};
 
 #[no_mangle]
 pub extern "C" fn on_close() {
@@ -10,13 +9,10 @@ pub extern "C" fn on_close() {
     let processing = reader.tx_processing();
     let processing_length = processing.len();
 
-    env.db_write("ledgers", 
-    &[
-        "sequence", 
-        "proc"
-    ], 
-    &[
-        &sequence.to_be_bytes(), 
-        &processing_length.to_be_bytes()]
-    ).unwrap();
+    env.db_write(
+        "ledgers",
+        &["sequence", "proc"],
+        &[&sequence.to_be_bytes(), &processing_length.to_be_bytes()],
+    )
+    .unwrap();
 }

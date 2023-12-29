@@ -1,17 +1,15 @@
 [package]
-name = "zephyr-track-all-sac"
+name = "zephyr-sac-events-tracker"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#stellar-xdr = { version = "20.0.1", default-features = false, features=["next", "serde", "base64"] }
 rs-zephyr-sdk = { path="../../zephyr/rs-zephyr-sdk" }
 
 [lib]
 crate-type = ["cdylib"]
-doctest = false
 
 
 [profile.release]
