@@ -1,5 +1,5 @@
 [package]
-name = "zephyr-track-all-sac"
+name = "zephyr-xycloans"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,6 +8,10 @@ edition = "2021"
 [dependencies]
 #stellar-xdr = { version = "20.0.1", default-features = false, features=["next", "serde", "base64"] }
 rs-zephyr-sdk = { path="../../zephyr/rs-zephyr-sdk" }
+hex = "0.4.3"
+base64 = "0.21.7"
+stellar-strkey = "0.0.8"
+sha2 = "0.10.8"
 
 [lib]
 crate-type = ["cdylib"]
