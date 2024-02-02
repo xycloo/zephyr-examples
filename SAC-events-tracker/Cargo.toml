@@ -1,0 +1,24 @@
+[package]
+name = "zephyr-sac-events-tracker"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rs-zephyr-sdk = { path="../../zephyr/rs-zephyr-sdk" }
+
+[lib]
+crate-type = ["cdylib"]
+
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
+

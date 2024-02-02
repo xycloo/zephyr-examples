@@ -48,6 +48,34 @@ pub extern "C" fn on_close() {
         .unwrap();
     }
 
+
+    // if no SAC was deployed add new record into historical trend
+    let num_created = created.len() as i64;
+    if num_created > 0 {
+        let previous_sacs = env.db_read("sac_count", &["number"]);
+        if let Ok(rows) = previous_sacs {
+            if let Some(last) = rows.rows.last() {
+                let mut byte_array: [u8; 8] = [0; 8];
+                let int = &last.row[0].0;
+                byte_array.copy_from_slice(&int[..int.len()]);
+                let tot_sacs = i64::from_be_bytes(byte_array) + num_created;
+
+                env.db_write(
+                    "sac_count",
+                    &["sequence", "number"],
+                    &[&current_ledger.to_be_bytes(), &tot_sacs.to_be_bytes()],
+                )
+                .unwrap()
+            } else {
+                env.db_write(
+                    "sac_count",
+                    &["sequence", "number"],
+                    &[&current_ledger.to_be_bytes(), &num_created.to_be_bytes()],
+                )
+                .unwrap()
+            }
+        }
+    }
 }
 
 fn write_from_v1(
