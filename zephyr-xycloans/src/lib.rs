@@ -1,10 +1,7 @@
 use rs_zephyr_sdk::{
-    scval_utils,
     stellar_xdr::next::{
-        ContractEvent, ContractEventBody, ContractExecutable, LedgerEntryData, Limits, ReadXdr,
-        ScAddress, ScVal, TransactionMeta, WriteXdr,
-    },
-    EntryChanges, EnvClient,
+        ContractEvent, ContractEventBody, ContractExecutable, Hash, LedgerEntry, LedgerEntryData, Limits, ReadXdr, ScAddress, ScSymbol, ScVal, ScVec, TransactionMeta, WriteXdr
+    }, utils, EntryChanges, EnvClient
 };
 use std::convert::TryInto;
 
@@ -13,10 +10,7 @@ fn to_array<T, const N: usize>(v: Vec<T>) -> [T; N] {
         .unwrap_or_else(|v: Vec<T>| panic!("Expected a Vec of length {} but it was {}", N, v.len()))
 }
 
-const POOL_HASH: [u8; 32] = [
-    157, 26, 248, 13, 179, 177, 103, 229, 225, 217, 93, 115, 139, 231, 31, 231, 21, 107, 67, 177,
-    23, 67, 28, 64, 96, 169, 26, 244, 92, 134, 198, 142,
-];
+const POOL_HASH: [u8; 32] = [234, 27, 149, 143, 240, 250, 6, 48, 179, 177, 31, 134, 138, 168, 116, 22, 128, 15, 183, 190, 183, 207, 43, 181, 28, 227, 39, 58, 186, 218, 195, 217];
 
 pub enum ZephyrError {
     ContractNotAPool,
@@ -169,9 +163,9 @@ impl<'a> ProcessingHandler<'a> {
         let (topics, data) = match &event.body {
             ContractEventBody::V0(v0) => {
                 if let Some(topic1) = v0.topics.get(0) {
-                    if topic1 == &scval_utils::to_scval_symbol("borrow").unwrap() {
+                    if topic1 == &utils::to_scval_symbol("borrow").unwrap() {
                         if let ScVal::I128(parts) = &v0.data {
-                            let amount = scval_utils::parts_to_i128(parts);
+                            let amount = utils::parts_to_i128(parts);
                             let fee = (amount as f64 * 0.08) / 100.0;
                             let yield_percentage = ((fee as f64) * 100.0) / current_supply as f64; // NB: this is safe assuming a correct
                                                                                                    // execution of the soroban vm.
@@ -189,13 +183,13 @@ impl<'a> ProcessingHandler<'a> {
                                 )
                                 .unwrap()
                         }
-                    } else if topic1 == &scval_utils::to_scval_symbol("newfee").unwrap() {
+                    } else if topic1 == &utils::to_scval_symbol("newfee").unwrap() {
                         if let Some(ScVal::Address(user_address)) = &v0.topics.get(1) {
                             let current_balance =
                                 self.get_current_balance(contract_id, user_address);
 
                             if let ScVal::I128(parts) = &v0.data {
-                                let amount = scval_utils::parts_to_i128(parts);
+                                let amount = utils::parts_to_i128(parts);
                                 let yield_percentage =
                                     ((amount as f64) * 100.0) / current_balance as f64; // NB: this is safe assuming a correct
                                                                                         // execution of the soroban vm.
@@ -215,13 +209,13 @@ impl<'a> ProcessingHandler<'a> {
                                     .unwrap()
                             }
                         }
-                    } else if topic1 == &scval_utils::to_scval_symbol("deposit").unwrap() {
+                    } else if topic1 == &utils::to_scval_symbol("deposit").unwrap() {
                         if let Some(ScVal::Address(user_address)) = &v0.topics.get(1) {
                             let current_balance =
                                 self.get_current_balance(contract_id, user_address);
 
                             if let ScVal::I128(parts) = &v0.data {
-                                let amount = scval_utils::parts_to_i128(parts);
+                                let amount = utils::parts_to_i128(parts);
 
                                 self.write_balance(
                                     &contract_id,
@@ -231,13 +225,13 @@ impl<'a> ProcessingHandler<'a> {
                                 self.write_supply(&contract_id, current_supply + amount);
                             }
                         }
-                    } else if topic1 == &scval_utils::to_scval_symbol("withdrawn").unwrap() {
+                    } else if topic1 == &utils::to_scval_symbol("withdrawn").unwrap() {
                         if let Some(ScVal::Address(user_address)) = &v0.topics.get(1) {
                             let current_balance =
                                 self.get_current_balance(contract_id, user_address);
 
                             if let ScVal::I128(parts) = &v0.data {
-                                let amount = scval_utils::parts_to_i128(parts);
+                                let amount = utils::parts_to_i128(parts);
 
                                 self.write_balance(
                                     &contract_id,
@@ -287,4 +281,11 @@ impl<'a> ProcessingHandler<'a> {
 
         Ok(())
     }
+}
+
+#[test]
+fn test() {
+    println!("{:?}", hex::decode("ea1b958ff0fa0630b3b11f868aa87416800fb7beb7cf2bb51ce3273abadac3d9").unwrap());
+    println!("{:?}", Hash::from_xdr_base64("XlzW2THWUxb75QN8uQrpMwajfH6EgZPVfiEbZ2zPNA0=", Limits::none()));
+    println!("{:?}", ScVal::from_xdr_base64("AAAAAwAAAAY=", Limits::none()));
 }

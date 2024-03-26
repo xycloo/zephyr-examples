@@ -5,7 +5,7 @@ use rs_zephyr_sdk::{
 
 #[no_mangle]
 pub extern "C" fn on_close() {
-    let mut env = EnvClient::default();
+    let mut env = EnvClient::new();
     let reader = env.reader();
 
     let sequence = reader.ledger_sequence();

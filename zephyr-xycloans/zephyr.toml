@@ -1,0 +1,120 @@
+name = "zephyr-xycloans"
+
+[[tables]]
+name = "xlsupply"
+
+[[tables.columns]]
+name = "contract"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "timestamp"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "supply"
+col_type = "BYTEA"
+
+
+[[tables]]
+name = "xlbalance"
+
+[[tables.columns]]
+name = "contract"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "timestamp"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "address"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "balance"
+col_type = "BYTEA"
+
+
+
+[[tables]]
+name = "xlpoolyld"
+
+[[tables.columns]]
+name = "contract"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "timestamp"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "yieldnorm"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "yield"
+col_type = "BYTEA"
+
+
+
+[[tables]]
+name = "xluseryld"
+
+[[tables.columns]]
+name = "contract"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "timestamp"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "address"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "yieldnorm"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "yield"
+col_type = "BYTEA"
+
+
+
+
+[[tables]]
+name = "xlevents"
+
+[[tables.columns]]
+name = "sequence"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "timestamp"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "contract"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "topic1"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "topic2"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "topic3"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "topic4"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "data"
+col_type = "BYTEA"
