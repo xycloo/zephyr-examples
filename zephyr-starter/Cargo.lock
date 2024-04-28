@@ -598,14 +598,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5e6163cb8c49088c2c36f57875e58ccd8c87c7427f7fbd50ea6710b2f3f2e8f"
 
 [[package]]
-name = "macros"
-version = "0.1.0"
-dependencies = [
- "quote",
- "syn",
-]
-
-[[package]]
 name = "memory_units"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -763,27 +755,31 @@ dependencies = [
 [[package]]
 name = "rs-zephyr-common"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "401a28b96fd645e0a188a5af41075e361d28c4a9b7fe70cb2f53a660aa52b46b"
 dependencies = [
  "anyhow",
  "http",
  "serde",
- "stellar-xdr 20.1.0 (git+https://github.com/stellar/rs-stellar-xdr?rev=44b7e2d4cdf27a3611663e82828de56c5274cba0)",
+ "stellar-xdr",
  "thiserror",
 ]
 
 [[package]]
 name = "rs-zephyr-sdk"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e13cabdf12661e494545ce743c2f31a9055afdb83f411347a1dd36296c57aae2"
 dependencies = [
  "bincode",
- "macros",
  "rs-zephyr-common",
  "serde",
  "serde_json",
  "soroban-sdk",
- "stellar-xdr 20.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stellar-xdr",
  "thiserror",
  "wee_alloc",
+ "zephyr-macros",
 ]
 
 [[package]]
@@ -944,7 +940,7 @@ dependencies = [
  "soroban-env-macros",
  "soroban-wasmi",
  "static_assertions",
- "stellar-xdr 20.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stellar-xdr",
 ]
 
 [[package]]
@@ -994,13 +990,15 @@ dependencies = [
  "quote",
  "serde",
  "serde_json",
- "stellar-xdr 20.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stellar-xdr",
  "syn",
 ]
 
 [[package]]
 name = "soroban-ledger-snapshot"
 version = "20.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "61a54708f44890e0546180db6b4f530e2a88d83b05a9b38a131caa21d005e25a"
 dependencies = [
  "serde",
  "serde_json",
@@ -1013,6 +1011,8 @@ dependencies = [
 [[package]]
 name = "soroban-sdk"
 version = "20.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "84fc8be9068dd4e0212d8b13ad61089ea87e69ac212c262914503a961c8dc3a3"
 dependencies = [
  "bytes-lit",
  "rand",
@@ -1028,6 +1028,8 @@ dependencies = [
 [[package]]
 name = "soroban-sdk-macros"
 version = "20.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "db20def4ead836663633f58d817d0ed8e1af052c9650a04adf730525af85b964"
 dependencies = [
  "crate-git-revision",
  "darling",
@@ -1039,16 +1041,18 @@ dependencies = [
  "soroban-env-common",
  "soroban-spec",
  "soroban-spec-rust",
- "stellar-xdr 20.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stellar-xdr",
  "syn",
 ]
 
 [[package]]
 name = "soroban-spec"
 version = "20.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3eefeb5d373b43f6828145d00f0c5cc35e96db56a6671ae9614f84beb2711cab"
 dependencies = [
  "base64 0.13.1",
- "stellar-xdr 20.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stellar-xdr",
  "thiserror",
  "wasmparser",
 ]
@@ -1056,13 +1060,15 @@ dependencies = [
 [[package]]
 name = "soroban-spec-rust"
 version = "20.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3152bca4737ef734ac37fe47b225ee58765c9095970c481a18516a2b287c7a33"
 dependencies = [
  "prettyplease",
  "proc-macro2",
  "quote",
  "sha2",
  "soroban-spec",
- "stellar-xdr 20.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "stellar-xdr",
  "syn",
  "thiserror",
 ]
@@ -1118,20 +1124,6 @@ name = "stellar-xdr"
 version = "20.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e59cdf3eb4467fb5a4b00b52e7de6dca72f67fac6f9b700f55c95a5d86f09c9d"
-dependencies = [
- "base64 0.13.1",
- "crate-git-revision",
- "escape-bytes",
- "hex",
- "serde",
- "serde_with",
- "stellar-strkey",
-]
-
-[[package]]
-name = "stellar-xdr"
-version = "20.1.0"
-source = "git+https://github.com/stellar/rs-stellar-xdr?rev=44b7e2d4cdf27a3611663e82828de56c5274cba0#44b7e2d4cdf27a3611663e82828de56c5274cba0"
 dependencies = [
  "base64 0.13.1",
  "crate-git-revision",
@@ -1427,6 +1419,16 @@ name = "windows_x86_64_msvc"
 version = "0.48.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed94fce61571a4006852b7389a063ab983c02eb1bb37b47f8272ce92d06d9538"
+
+[[package]]
+name = "zephyr-macros"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0751c7b3249a29ad7349a1ddaadac53f3338e21b1e6b73d04b37fda8526eacb3"
+dependencies = [
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "zephyr-starter-template"

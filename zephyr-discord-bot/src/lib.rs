@@ -11,8 +11,8 @@ fn into_val<T: TryFromVal<Env, Val>>(env: &Env, val: &Val) -> Option<T> {
 
 #[no_mangle]
 pub extern "C" fn on_close() {
-    let z_env = EnvClient::new();
-    let env = rs_zephyr_sdk::soroban_sdk::Env::default();
+    let env = EnvClient::new();
+
 
     z_env.send_web_request(AgnosticRequest {
         body: Some("Hello from Zephyr Monitor Program!".into()),

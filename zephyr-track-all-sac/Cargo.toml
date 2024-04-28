@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 #stellar-xdr = { version = "20.0.1", default-features = false, features=["next", "serde", "base64"] }
-rs-zephyr-sdk = { path="../../zephyr/rs-zephyr-sdk" }
+rs-zephyr-sdk = { version = "0.1.0" }
 
 [lib]
 crate-type = ["cdylib"]
