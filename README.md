@@ -6,6 +6,11 @@ checking out only
 
 - [Zephyr Starter](./zephyr-starter/)
 - [Zephyr Hello Ledger](./zephyr-hello-ledger/)
-- [Soroban governor indexer](https://github.com/script3/soroban-governor-indexer)
+- [Soroban governor indexer](https://github.com/script3/soroban-governor-indexer): this is a real-world example that uses the newer SDK versions.
+- [Zephyr Discord Bot](./zephyr-discord-bot/)
+- [Zephyr Web Request](./zephyr-alert/)
+- [Zephyr Logger](./zephyr-logger/)
 
-Which are using the updated SDK.
+# Documentation
+
+Documentation is at https://docs.mercurydata.app/

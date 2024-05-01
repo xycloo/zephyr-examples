@@ -1,6 +1,6 @@
-use rs_zephyr_sdk::{EnvClient};
+use zephyr_sdk::{prelude::*, EnvClient};
 
 #[no_mangle]
 pub extern "C" fn on_close() {
-    let mut env = EnvClient::new();
+    let env = EnvClient::new();
 }

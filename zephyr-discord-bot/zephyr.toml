@@ -1,8 +1,1 @@
-name = "zephyr-alert"
-
-[[tables]]
-name = "curr_seq"
-
-[[tables.columns]]
-name = "current"
-col_type = "BYTEA"
+name = "zephyr-discord-bot"

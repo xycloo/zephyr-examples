@@ -766,23 +766,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rs-zephyr-sdk"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e13cabdf12661e494545ce743c2f31a9055afdb83f411347a1dd36296c57aae2"
-dependencies = [
- "bincode",
- "rs-zephyr-common",
- "serde",
- "serde_json",
- "soroban-sdk",
- "stellar-xdr",
- "thiserror",
- "wee_alloc",
- "zephyr-macros",
-]
-
-[[package]]
 name = "rustc_version"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1431,10 +1414,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "zephyr-sdk"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb22bc8e8b1e03015dd50cd97507171eb25d8498dc15b36bfdea0dce28b2808c"
+dependencies = [
+ "bincode",
+ "rs-zephyr-common",
+ "serde",
+ "serde_json",
+ "soroban-sdk",
+ "thiserror",
+ "wee_alloc",
+ "zephyr-macros",
+]
+
+[[package]]
 name = "zephyr-starter-template"
 version = "0.1.0"
 dependencies = [
- "rs-zephyr-sdk",
+ "zephyr-sdk",
 ]
 
 [[package]]

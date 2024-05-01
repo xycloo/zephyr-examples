@@ -1,8 +1,1 @@
 name = "zephyr-logger"
-
-[[tables]]
-name = "curr_seq"
-
-[[tables.columns]]
-name = "current"
-col_type = "BYTEA"

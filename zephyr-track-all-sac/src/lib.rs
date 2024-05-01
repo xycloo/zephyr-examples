@@ -1,5 +1,9 @@
-use rs_zephyr_sdk::{
-    stellar_xdr::next::{
+//! NOTE:
+//! This example is outdated and should not be used as reference.
+//!
+//! 
+use zephyr_sdk::{
+    soroban_sdk::xdr::{
         ContractIdPreimage, FeeBumpTransactionInnerTx, HostFunction, LedgerKey, Limits,
         OperationBody, ScAddress, TransactionEnvelope, TransactionExt, TransactionResultMeta,
         TransactionResultResult, TransactionV1Envelope, WriteXdr,

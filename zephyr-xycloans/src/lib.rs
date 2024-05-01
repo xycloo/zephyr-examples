@@ -1,5 +1,8 @@
-use rs_zephyr_sdk::{
-    stellar_xdr::next::{
+//! NOTE:
+//! This example is outdated and should not be used as reference.
+//!
+use zephyr_sdk::{
+    soroban_sdk::xdr::{
         ContractEvent, ContractEventBody, ContractExecutable, Hash, LedgerEntry, LedgerEntryData, Limits, ReadXdr, ScAddress, ScSymbol, ScVal, ScVec, TransactionMeta, WriteXdr
     }, utils, EntryChanges, EnvClient
 };
@@ -288,4 +291,5 @@ fn test() {
     println!("{:?}", hex::decode("ea1b958ff0fa0630b3b11f868aa87416800fb7beb7cf2bb51ce3273abadac3d9").unwrap());
     println!("{:?}", Hash::from_xdr_base64("XlzW2THWUxb75QN8uQrpMwajfH6EgZPVfiEbZ2zPNA0=", Limits::none()));
     println!("{:?}", ScVal::from_xdr_base64("AAAAAwAAAAY=", Limits::none()));
+    println!("{:?}", stellar_strkey::Contract::from_string("CARDOVHUIQVBDUKEYKCS4YDFFM7VSAHIMKCZ57NZKS6CT7RBEZNRKKL5").unwrap().0);
 }

@@ -1,11 +1,15 @@
-use rs_zephyr_sdk::{
-    stellar_xdr::next::{ContractEventBody, Limits, TransactionMeta, WriteXdr},
+//! NOTE:
+//! This example is outdated and should not be used as reference.
+//! 
+//! 
+use zephyr_sdk::{
+    soroban_sdk::xdr::{ContractEventBody, Limits, TransactionMeta, WriteXdr},
     EnvClient,
 };
 
 #[no_mangle]
 pub extern "C" fn on_close() {
-    let mut env = EnvClient::new();
+    let env = EnvClient::new();
     let reader = env.reader();
 
     let sequence = reader.ledger_sequence();
