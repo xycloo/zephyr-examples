@@ -1,0 +1,29 @@
+[package]
+name = "zephyr-blend-dashboards"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+#zephyr-sdk = { version = "0.1.5" }
+zephyr-sdk = { path = "../../rs-zephyr-sdk/zephyr-sdk" }
+stellar-strkey = "0.0.8"
+serde = {version = "1.0", features = ["derive"]}
+serde_json = "1.0"
+charming = { path = "../../charming/charming", features=["wasm"] }
+#pool = {git="https://github.com/blend-capital/blend-contracts"}
+#pool-factory = {git="https://github.com/blend-capital/blend-contracts"}
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true

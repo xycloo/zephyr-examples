@@ -1,0 +1,61 @@
+name = "zephyr-blend-dashboards"
+
+[[tables]]
+name = "supply"
+
+[[tables.columns]]
+name = "ledger"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "pool"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "asset"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "supply"
+col_type = "BYTEA"
+
+
+[[tables]]
+name = "clateral"
+
+[[tables.columns]]
+name = "ledger"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "pool"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "asset"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "clateral"
+col_type = "BYTEA"
+
+
+[[tables]]
+name = "borrowed"
+
+[[tables.columns]]
+name = "ledger"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "pool"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "asset"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "borrowed"
+col_type = "BYTEA"
+
