@@ -28,7 +28,6 @@ pub struct Positions {
     pub supply: Map<u32, i128>,      // Map of Reserve Index to non-collateral supply share balance
 }
 
-
 #[derive(Clone)]
 #[contracttype]
 pub enum PoolDataKey {
@@ -70,50 +69,87 @@ pub(crate) struct StellarAssetContractMetadata {
 #[derive(DatabaseDerive)]
 #[with_name("supply")]
 pub struct Supply {
-    pub ledger: ScVal,
-    pub pool: ScVal,
-    pub asset: ScVal,
-    pub supply: ScVal,
+    pub timestamp: u64,
+    pub ledger: u32,
+    pub pool: String,
+    pub asset: String,
+    pub supply: i128,
+    pub delta: i128,
+    pub change_source: String,
 }
 
 #[derive(DatabaseDerive)]
 #[with_name("clateral")]
 pub struct Collateral {
-    pub ledger: ScVal,
-    pub pool: ScVal,
-    pub asset: ScVal,
-    pub clateral: ScVal,
+    pub timestamp: u64,
+    pub ledger: u32,
+    pub pool: String,
+    pub asset: String,
+    pub clateral: i128,
+    pub delta: i128,
+    pub change_source: String,
 }
 
 #[derive(DatabaseDerive, Serialize)]
 #[with_name("borrowed")]
 pub struct Borrowed {
-    pub ledger: ScVal,
-    pub pool: ScVal,
-    pub asset: ScVal,
-    pub borrowed: ScVal,
+    pub timestamp: u64,
+    pub ledger: u32,
+    pub pool: String,
+    pub asset: String,
+    pub borrowed: i128,
+    pub delta: i128,
+    pub change_source: String,
 }
 
+#[derive(DatabaseDerive, Serialize)]
+#[with_name("auction")]
+pub struct Auction {
+    pub timestamp: u64,
+    pub ledger: u32,
+    pub pool: String,
+    pub asset: String,
+    pub atype: String,
+    pub amount: i128,
+    pub change_source: String,
+}
+
+impl Auction {
+    pub fn new(env: &EnvClient, pool: Address, asset: ScVal, amount: i128, change_source: Address, atype: String) -> Self {
+        Self { 
+            timestamp: env.reader().ledger_timestamp(), 
+            ledger: env.reader().ledger_sequence(), 
+            pool: crate::chart::soroban_string_to_string(env, pool.to_string()), 
+            asset: crate::chart::soroban_string_to_string(env, env.from_scval::<Address>(&asset).to_string()), 
+            atype, 
+            amount, 
+            change_source: crate::chart::soroban_string_to_string(env, change_source.to_string()) 
+        }
+    }
+}
 
 pub(crate) trait Common {
-    fn get_info(&self) -> (ScVal, ScVal, ScVal);
+    fn get_info(&self) -> (String, String, i128);
 
-    fn new(env: &EnvClient, pool: Address, asset: ScVal, supply: i128) -> Self;
+    fn new(env: &EnvClient, pool: Address, asset: ScVal, supply: i128, delta: i128, change_source: ScVal) -> Self;
 }
 
 macro_rules! impl_common {
     ($struct_name:ident, $denom:ident) => {
         impl Common for $struct_name {
-            fn get_info(&self) -> (ScVal, ScVal, ScVal) {
+            fn get_info(&self) -> (String, String, i128) {
                 (self.pool.clone(), self.asset.clone(), self.$denom.clone())
             }
 
-            fn new(env: &EnvClient, pool: Address, asset: ScVal, supply: i128) -> Self {
+            fn new(env: &EnvClient, pool: Address, asset: ScVal, supply: i128, delta: i128, change_source: ScVal) -> Self {
                 Self {
-                    ledger: env.to_scval(env.reader().ledger_sequence()),
-                    pool: env.to_scval(pool),
-                    asset,
-                    $denom: env.to_scval(supply),
+                    timestamp: env.reader().ledger_timestamp(),
+                    ledger: env.reader().ledger_sequence(),
+                    pool: crate::chart::soroban_string_to_string(env, pool.to_string()),
+                    asset: crate::chart::soroban_string_to_string(env, env.from_scval::<Address>(&asset).to_string()),
+                    change_source: crate::chart::soroban_string_to_string(env, env.from_scval::<Address>(&change_source).to_string()),
+                    delta,
+                    $denom: supply,
                 }
             }
         }

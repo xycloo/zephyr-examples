@@ -9,7 +9,7 @@ use zephyr_sdk::{
 
 pub const STROOP: i128 = 10_000_000;
 
-fn soroban_string_to_string(env: &EnvClient, string: SorobanString) -> String {
+pub fn soroban_string_to_string(env: &EnvClient, string: SorobanString) -> String {
     let sc_val: ScVal = env.to_scval(string);
     if let ScVal::String(ScString(s)) = sc_val {
         let s = s.to_utf8_string().unwrap();
@@ -53,21 +53,6 @@ fn get_from_ledger(env: &EnvClient, contract: String) {
     }
 }
 
-fn scval_to_i128(val: &ScVal) -> i128 {
-    let ScVal::I128(parts) = val else {panic!()};
-    utils::parts_to_i128(&parts)
-}
-
-fn scval_to_u32(val: &ScVal) -> u32 {
-    let ScVal::U32(int) = val else {panic!()};
-    *int
-}
-
-fn address_to_string(address: &ScVal) -> String {
-    let ScVal::Address(addr) = address else {panic!()};
-    addr.to_string()
-}
-
 pub fn aggregate_data(
     supplies: Vec<Supply>,
     collaterals: Vec<Collateral>,
@@ -78,13 +63,13 @@ pub fn aggregate_data(
     for supply in supplies {
         let pool = supply.pool;  // Convert pool to string for hashmap key
         let asset = supply.asset;  // Convert asset to string for hashmap key
-        let supply_value = scval_to_i128(&supply.supply);
-        let ledger: u32 = scval_to_u32(&supply.ledger);
+        let supply_value = supply.supply;
+        let ledger =supply.ledger;
 
         aggregated_data
-        .entry(address_to_string(&pool))
+        .entry(pool)
             .or_insert_with(HashMap::new)
-            .entry(address_to_string(&asset))
+            .entry(asset)
             .or_insert_with(AggregatedData::new)
             .add_supply(ledger, supply_value);
     }
@@ -92,28 +77,28 @@ pub fn aggregate_data(
     for collateral in collaterals {
         let pool = collateral.pool;
         let asset = collateral.asset;
-        let collateral_value: i128 = scval_to_i128(&collateral.clateral);
-        let ledger: u32 = scval_to_u32(&collateral.ledger);
+        let collateral_value = collateral.clateral;
+        let ledger = collateral.ledger;
 
         aggregated_data
-            .entry(address_to_string(&pool))
-            .or_insert_with(HashMap::new)
-            .entry(address_to_string(&asset))
-            .or_insert_with(AggregatedData::new)
+        .entry(pool)
+        .or_insert_with(HashMap::new)
+        .entry(asset)
+        .or_insert_with(AggregatedData::new)
             .add_collateral(ledger, collateral_value)
     }
 
     for borrowed in borroweds {
         let pool = borrowed.pool;
         let asset = borrowed.asset;
-        let borrowed_value: i128 = scval_to_i128(&borrowed.borrowed);
-        let ledger: u32 = scval_to_u32(&borrowed.ledger);
+        let borrowed_value = borrowed.borrowed;
+        let ledger = borrowed.ledger;
 
         aggregated_data
-            .entry(address_to_string(&pool))
-            .or_insert_with(HashMap::new)
-            .entry(address_to_string(&asset))
-            .or_insert_with(AggregatedData::new)
+        .entry(pool)
+        .or_insert_with(HashMap::new)
+        .entry(asset)
+        .or_insert_with(AggregatedData::new)
             .add_borrowed(ledger, borrowed_value)
     }
 
