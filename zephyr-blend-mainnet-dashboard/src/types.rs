@@ -2,9 +2,55 @@
 use serde::Serialize;
 use zephyr_sdk::{
     prelude::*, soroban_sdk::{
-        self, contracttype, xdr::ScVal, Address, String as SorobanString
+        self, contracttype, xdr::ScVal, Address, Map, String as SorobanString
     }, DatabaseDerive, EnvClient
 };
+
+#[derive(Clone)]
+#[contracttype]
+pub struct UserReserveKey {
+    user: Address,
+    reserve_id: u32,
+}
+
+#[derive(Clone)]
+#[contracttype]
+pub struct AuctionKey {
+    user: Address,  // the Address whose assets are involved in the auction
+    auct_type: u32, // the type of auction taking place
+}
+
+#[derive(Clone)]
+#[contracttype]
+pub struct Positions {
+    pub liabilities: Map<u32, i128>, // Map of Reserve Index to liability share balance
+    pub collateral: Map<u32, i128>,  // Map of Reserve Index to collateral supply share balance
+    pub supply: Map<u32, i128>,      // Map of Reserve Index to non-collateral supply share balance
+}
+
+
+#[derive(Clone)]
+#[contracttype]
+pub enum PoolDataKey {
+    // A map of underlying asset's contract address to reserve config
+    ResConfig(Address),
+    // A map of underlying asset's contract address to queued reserve init
+    ResInit(Address),
+    // A map of underlying asset's contract address to reserve data
+    ResData(Address),
+    // The reserve's emission config
+    EmisConfig(u32),
+    // The reserve's emission data
+    EmisData(u32),
+    // Map of positions in the pool for a user
+    Positions(Address),
+    // The emission information for a reserve asset for a user
+    UserEmis(UserReserveKey),
+    // The auction's data
+    Auction(AuctionKey),
+    // A list of auctions and their associated data
+    AuctData(Address),
+}
 
 #[derive(Clone)]
 #[contracttype]

@@ -1,10 +1,10 @@
 use std::collections::HashMap;
-use charming::{component::{Axis, Grid, Legend, Title}, element::{AxisType, Tooltip, Trigger}, series::{Bar, Line}, Chart};
-use crate::types::{Borrowed, Collateral, StellarAssetContractMetadata, Supply, AggregatedData};
+use charming::{component::{Axis, Grid, Legend, Title}, element::{AreaStyle, AxisType, Color, ColorStop, Tooltip, Trigger}, series::{Bar, Line}, Chart};
+use crate::types::{AggregatedData, Borrowed, Collateral, PoolDataKey, Positions, StellarAssetContractMetadata, Supply};
 use zephyr_sdk::{
     soroban_sdk::{
-        xdr::{LedgerEntryData, ScString, ScVal}, String as SorobanString, Symbol
-    }, utils, EnvClient
+        xdr::{LedgerEntryData, ScString, ScVal}, Address, String as SorobanString, Symbol
+    }, utils, ContractDataEntry, EnvClient
 };
 
 pub const STROOP: i128 = 10_000_000;
@@ -29,6 +29,28 @@ fn get_from_instance(env: &EnvClient, contract: String, str_: &str) -> ScVal {
     let val = instance.storage.as_ref().unwrap().0.iter().find(|entry| entry.key == env.to_scval(Symbol::new(&env.soroban(), str_)));
 
     val.unwrap().val.clone()
+}
+
+fn get_all_entries(env: &EnvClient, contract: String) -> Vec<ContractDataEntry> {
+    env.read_contract_entries(stellar_strkey::Contract::from_string(&contract).unwrap().0).unwrap()
+}
+
+fn get_from_ledger(env: &EnvClient, contract: String) {
+    let entries = get_all_entries(env, contract);
+    let mut all_positions: HashMap<String, Positions> = HashMap::new();
+    
+    for entry in entries {
+        let LedgerEntryData::ContractData(data) = entry.entry.data else {panic!()};
+        if let Ok(entry_key) = env.try_from_scval::<PoolDataKey>(&entry.key) {
+            match entry_key {
+                PoolDataKey::Positions(user) => {
+                    all_positions.insert(soroban_string_to_string(env, user.to_string()), env.from_scval(&data.val));
+                },
+
+                _ => ()
+            }
+        }
+    }
 }
 
 fn scval_to_i128(val: &ScVal) -> i128 {
@@ -122,21 +144,21 @@ pub fn create_chart(env: &EnvClient, aggregated_data: HashMap<String, HashMap<St
            {
                 let line_data: Vec<i64> = data.collateral.iter().map(|(_, value)| *value as i64 / STROOP as i64).collect();
                 let all_ledgers: Vec<String> = data.collateral.iter().map(|(ledger, _)| ledger.to_string()).collect();
-                lines.push(Line::new().name(format!("Collateral of pool {} and asset {}", pool, asset)).data(line_data));
+                lines.push(Line::new().name(format!("Collateral of pool {} and asset {}", pool, asset)).data(line_data).area_style(AreaStyle::new().color(Color::LinearGradient { x: 0, y: 0, x2: 0, y2: 1, color_stops: vec![ColorStop::new(0, "rgb(255, 158, 68)"), ColorStop::new(1, "rgb(255, 70, 131)")] })));
                 ledgers.push(all_ledgers);
             }
             {
                 let line_data: Vec<i64> = data.borrowed.iter().map(|(_, value)| *value as i64 / STROOP as i64).collect();
                 let all_ledgers: Vec<String> = data.borrowed.iter().map(|(ledger, _)| ledger.to_string()).collect();
-                lines.push(Line::new().name(format!("Borrowed from pool {} and asset {}", pool, asset)).data(line_data));
+                lines.push(Line::new().name(format!("Borrowed from pool {} and asset {}", pool, asset)).data(line_data).area_style(AreaStyle::new().color(Color::LinearGradient { x: 0, y: 0, x2: 0, y2: 1, color_stops: vec![ColorStop::new(0, "rgb(104,95,255)"), ColorStop::new(1, "rgb(169,240,255)")] })));
                 ledgers.push(all_ledgers);
             }
         }
     }
     
     let mut chart = Chart::new()
-        .title(Title::new().text("Blend Mainnet Dashboard"))
-        .legend(Legend::new().show(true).left("0").top("3%"))
+        .title(Title::new().text("Blend Mainnet Dashboard").left("150px"))
+        .legend(Legend::new().show(true).left("150px").top("3%"))
         .tooltip(Tooltip::new().trigger(Trigger::Axis))
         .x_axis(Axis::new().type_(AxisType::Category).data(categories.clone()).grid_index(0))
         .y_axis(Axis::new().type_(AxisType::Value).grid_index(0))

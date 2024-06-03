@@ -85,7 +85,9 @@ pub extern "C" fn on_close() {
             add_supply::<Collateral>(&env, &event, contract_address, false);
         } else if action == Symbol::new(env.soroban(), "borrow") {
             add_supply::<Borrowed>(&env, &event, contract_address, true)
-        } 
+        } else if action == Symbol::new(env.soroban(), "repay") {
+            add_supply::<Borrowed>(&env, &event, contract_address, false)
+        }
     }
     env.log().debug(format!("execution end"), None);
 }
