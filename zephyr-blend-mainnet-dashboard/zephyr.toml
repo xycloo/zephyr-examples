@@ -1,12 +1,15 @@
 name = "zephyr-blend-dashboards"
 
-
 #
 # Collateral
 #
 
 [[tables]]
 name = "supply"
+
+[[tables.columns]]
+name = "id"
+col_type = "BYTEA"
 
 [[tables.columns]]
 name = "timestamp"
@@ -33,9 +36,8 @@ name = "delta"
 col_type = "BYTEA"
 
 [[tables.columns]]
-name = "change_source"
+name = "source"
 col_type = "BYTEA"
-
 
 
 #
@@ -44,6 +46,10 @@ col_type = "BYTEA"
 
 [[tables]]
 name = "clateral"
+
+[[tables.columns]]
+name = "id"
+col_type = "BYTEA"
 
 [[tables.columns]]
 name = "timestamp"
@@ -70,7 +76,7 @@ name = "delta"
 col_type = "BYTEA"
 
 [[tables.columns]]
-name = "change_source"
+name = "source"
 col_type = "BYTEA"
 
 
@@ -82,6 +88,10 @@ col_type = "BYTEA"
 name = "borrowed"
 
 [[tables.columns]]
+name = "id"
+col_type = "BYTEA"
+
+[[tables.columns]]
 name = "timestamp"
 col_type = "BYTEA"
 
@@ -106,7 +116,39 @@ name = "delta"
 col_type = "BYTEA"
 
 [[tables.columns]]
-name = "change_source"
+name = "source"
+col_type = "BYTEA"
+
+
+#
+# Actions
+#
+
+[[tables]]
+name = "totact"
+
+[[tables.columns]]
+name = "pool"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "asset"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "supply"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "clateral"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "borrowed"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "auction"
 col_type = "BYTEA"
 
 
@@ -142,5 +184,5 @@ name = "amount"
 col_type = "BYTEA"
 
 [[tables.columns]]
-name = "change_source"
+name = "source"
 col_type = "BYTEA"

@@ -1,7 +1,19 @@
 name = "zephyr-blend-dashboards"
 
+#
+# Collateral
+#
+
 [[tables]]
 name = "supply"
+
+[[tables.columns]]
+name = "id"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "timestamp"
+col_type = "BYTEA"
 
 [[tables.columns]]
 name = "ledger"
@@ -19,11 +31,31 @@ col_type = "BYTEA"
 name = "supply"
 col_type = "BYTEA"
 
+[[tables.columns]]
+name = "delta"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "source"
+col_type = "BYTEA"
+
+
+#
+# Collateral
+#
 
 [[tables]]
 name = "clateral"
 
 [[tables.columns]]
+name = "id"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "timestamp"
+col_type = "BYTEA"
+
+[[tables.columns]]
 name = "ledger"
 col_type = "BYTEA"
 
@@ -39,9 +71,29 @@ col_type = "BYTEA"
 name = "clateral"
 col_type = "BYTEA"
 
+[[tables.columns]]
+name = "delta"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "source"
+col_type = "BYTEA"
+
+
+#
+# Borrowed
+#
 
 [[tables]]
 name = "borrowed"
+
+[[tables.columns]]
+name = "id"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "timestamp"
+col_type = "BYTEA"
 
 [[tables.columns]]
 name = "ledger"
@@ -59,3 +111,78 @@ col_type = "BYTEA"
 name = "borrowed"
 col_type = "BYTEA"
 
+[[tables.columns]]
+name = "delta"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "source"
+col_type = "BYTEA"
+
+
+#
+# Actions
+#
+
+[[tables]]
+name = "totact"
+
+[[tables.columns]]
+name = "pool"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "asset"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "supply"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "clateral"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "borrowed"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "auction"
+col_type = "BYTEA"
+
+
+#
+# Auction
+#
+
+[[tables]]
+name = "auction"
+
+[[tables.columns]]
+name = "timestamp"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "ledger"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "pool"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "asset"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "atype"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "amount"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "source"
+col_type = "BYTEA"

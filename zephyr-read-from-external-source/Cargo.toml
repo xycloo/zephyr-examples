@@ -1,5 +1,5 @@
 [package]
-name = "zephyr-blend-dashboards"
+name = "zephyr-read-from-external-source"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,13 +7,7 @@ edition = "2021"
 
 [dependencies]
 zephyr-sdk = { version = "0.1.6" }
-#zephyr-sdk = { path = "../../rs-zephyr-sdk/zephyr-sdk" }
-stellar-strkey = "0.0.8"
-serde = {version = "1.0", features = ["derive"]}
-serde_json = "1.0"
-charming-fork-zephyr = "0.3.1"
-#pool = {git="https://github.com/blend-capital/blend-contracts"}
-#pool-factory = {git="https://github.com/blend-capital/blend-contracts"}
+serde = {version = "1.0", features = ["derive"] }
 
 [lib]
 crate-type = ["cdylib"]
