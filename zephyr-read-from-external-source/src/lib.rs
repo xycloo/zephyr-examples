@@ -1,28 +1,50 @@
-use zephyr_sdk::{prelude::*, soroban_sdk::xdr::ScVal, utils, DatabaseDerive, EnvClient};
+use serde::{Deserialize, Serialize};
+use zephyr_sdk::{prelude::*, EnvClient, DatabaseDerive};
 
 #[derive(DatabaseDerive, Clone)]
-#[with_name("clateral")]
-#[external("7")]
-pub struct Collateral {
-    pub ledger: ScVal,
-    pub pool: ScVal,
-    pub asset: ScVal,
-    pub clateral: ScVal,
+#[with_name("borrowed")]
+#[external("8")]
+pub struct Borrowed {
+    pub id: i64,
+    pub timestamp: u64,
+    pub ledger: u32,
+    pub pool: String,
+    pub asset: String,
+    pub borrowed: i128,
+    pub delta: i128,
+    pub source: String,
+}
+
+#[derive(Deserialize)]
+pub struct Request {
+    pool: String,
+}
+
+#[derive(Serialize)]
+pub struct ResponseObject {
+    pub timestamp: u64,
+    pub ledger: u32,
+    pub asset: String,
+    pub borrowed: String,
+    pub delta: String,
+    pub source: String,
 }
 
 #[no_mangle]
-pub extern "C" fn on_close() {
-    let env = EnvClient::new();
-}
-
-#[no_mangle]
-pub fn dashboard() {
+pub extern "C" fn get_borrowed_by_pool() {
     let env = EnvClient::empty();
-    let collaterals: Vec<Collateral> = env.read();
-    let amounts: Vec<i64> = collaterals.iter().map(|obj| {
-        let ScVal::I128(parts) = obj.clateral.clone() else {panic!()};
-        utils::parts_to_i128(&parts) as i64
+    let request: Request = env.read_request_body();
+    let borrowed: Vec<Borrowed> = env.read_filter().column_equal_to("pool", request.pool).read().unwrap();
+    let borrowed: Vec<ResponseObject> = borrowed.iter().map(|obj| {
+        ResponseObject {
+            timestamp: obj.timestamp,
+            ledger: obj.ledger,
+            asset: obj.asset.clone(),
+            borrowed: (obj.borrowed as i64).to_string(),
+            delta: (obj.delta as i64).to_string(),
+            source: obj.source.clone()
+        }
     }).collect();
 
-    env.conclude(amounts)
+    env.conclude(&borrowed)
 }
