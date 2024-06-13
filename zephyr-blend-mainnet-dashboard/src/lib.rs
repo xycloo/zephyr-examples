@@ -107,6 +107,7 @@ pub extern "C" fn on_close() {
 #[no_mangle]
 pub extern "C" fn dashboard() {
     let env = EnvClient::empty();
+    env.log().debug("Starting program", None);
     let dasboard = {
         let supplies = env.read();
         //env.log().debug(format!("{:?}", env.to_scval((env.from_scval::<i128>(&supplies[0].supply) as i64 / STROOP as i64) as i128)), None);
@@ -115,9 +116,9 @@ pub extern "C" fn dashboard() {
         env.log().debug("Aggregating data", None);
         let timestamp = env.soroban().ledger().timestamp();
         env.log().debug(format!("Timestamp is {}", timestamp), None);
-        let (aggregated, volume) = aggregate_data(timestamp as i64, supplies, collaterals.clone(), borroweds.clone());
+        let aggregated = aggregate_data(timestamp as i64, &supplies, &collaterals, &borroweds);
         env.log().debug("Data aggregated", None);
-        let dashboard = build_dashboard(&env, aggregated, volume, collaterals, borroweds);
+        let dashboard = build_dashboard(&env, aggregated, &collaterals, &borroweds);
 
         env.log().debug("chart built", None);
         dashboard

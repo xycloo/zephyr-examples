@@ -21,7 +21,7 @@ pub fn soroban_string_to_string(env: &EnvClient, string: SorobanString) -> Strin
     }
 }
 
-fn get_from_instance(env: &EnvClient, contract: String, str_: &str) -> ScVal {
+fn get_from_instance(env: &EnvClient, contract: &str, str_: &str) -> ScVal {
     let instance = env.read_contract_instance(stellar_strkey::Contract::from_string(&contract).unwrap().0).unwrap().unwrap();
     let LedgerEntryData::ContractData(data) = instance.entry.data else {
         panic!()
@@ -32,14 +32,14 @@ fn get_from_instance(env: &EnvClient, contract: String, str_: &str) -> ScVal {
     val.unwrap().val.clone()
 }
 
-fn get_all_entries(env: &EnvClient, contract: String) -> Vec<ContractDataEntry> {
-    env.read_contract_entries(stellar_strkey::Contract::from_string(&contract).unwrap().0).unwrap()
+fn get_all_entries(env: &EnvClient, contract: &str) -> Vec<ContractDataEntry> {
+    env.read_contract_entries(stellar_strkey::Contract::from_string(contract).unwrap().0).unwrap()
 }
 
-fn get_from_ledger(env: &EnvClient, contract: String) -> Vec<(AuctionKey, ScVal)> {
+fn get_from_ledger(env: &EnvClient, contract: &str) -> i64 {
+    let mut total_positions = 0_i64;
     let entries = get_all_entries(env, contract);
-    //let mut all_positions: HashMap<String, Positions> = HashMap::new();
-    let mut all_auctions = Vec::new();
+
     for entry in entries {
         let LedgerEntryData::ContractData(data) = entry.entry.data else {
             env.log().debug(format!("not contract data {:?}", entry.entry.data), None);
@@ -47,130 +47,86 @@ fn get_from_ledger(env: &EnvClient, contract: String) -> Vec<(AuctionKey, ScVal)
         env.log().debug(format!("key {:?}", entry.key), None);
         if let Ok(entry_key) = env.try_from_scval::<PoolDataKey>(&data.key) {
             match entry_key {
-                /*PoolDataKey::Positions(user) => {
-                    all_positions.insert(soroban_string_to_string(env, user.to_string()), env.from_scval(&data.val));
-                },*/
-
-                PoolDataKey::Auction(key) => {
-                    all_auctions.push((key, data.val.clone()))
-                }
-
+                PoolDataKey::Positions(_) => {
+                    total_positions += 1
+                },
                 _ => ()
             }
         }
     }
 
-    all_auctions
+    total_positions
 }
 
-pub fn aggregate_data(
+pub fn aggregate_data<'a>(
     timestamp: i64,
-    supplies: Vec<Supply>,
-    collaterals: Vec<Collateral>,
-    borroweds: Vec<Borrowed>,
-) -> (HashMap<String, HashMap<String, AggregatedData>>, Vec<(String, u64)>) {
+    supplies: &'a Vec<Supply>,
+    collaterals: &'a Vec<Collateral>,
+    borroweds: &'a Vec<Borrowed>,
+) -> HashMap<&'a str, HashMap<&'a str, AggregatedData>> {
     let env = EnvClient::empty();
-    let mut aggregated_data: HashMap<String, HashMap<String, AggregatedData>> = HashMap::new();
-    let mut volume_24hrs: Vec<(String, u64)> = Vec::new();
+    let mut aggregated_data: HashMap<&'a str, HashMap<&'a str, AggregatedData>> = HashMap::new();
+    //let mut volume_24hrs: Vec<(&'a str, u64)> = Vec::new();
     //let mut volume_week = HashMap::new();
 
     env.log().debug("hashmaps", None);
 
     for supply in supplies {
-        let pool = supply.pool;  // Convert pool to string for hashmap key
-        let asset = supply.asset;  // Convert asset to string for hashmap key
+        let pool = &supply.pool;  // Convert pool to string for hashmap key
+        let asset = &supply.asset;  // Convert asset to string for hashmap key
         let supply_value = supply.supply;
         let ledger =supply.ledger;
 
         aggregated_data
-        .entry(pool)
+        .entry(&pool)
             .or_insert_with(HashMap::new)
-            .entry(asset)
+            .entry(&asset)
             .or_insert_with(AggregatedData::new)
             .add_supply(ledger, supply_value);
     }
 
     for collateral in collaterals {
-        let pool = collateral.pool;
-        let asset = collateral.asset;
+        let pool = &collateral.pool;
+        let asset = &collateral.asset;
         let collateral_value = collateral.clateral;
         let ledger = collateral.ledger;
-
         let entry_timestamp = collateral.timestamp;
-        if entry_timestamp as i64 + DAY_TIMEFRAME > timestamp {
-            for (s_asset, s_volume) in volume_24hrs.iter_mut() {
-                if asset == *s_asset {
-                    *s_volume += collateral.delta as u64
-                }
-            }
-        }
 
         aggregated_data
-        .entry(pool)
+        .entry(&pool)
         .or_insert_with(HashMap::new)
-        .entry(asset)
+        .entry(&asset)
         .or_insert_with(AggregatedData::new)
-            .add_collateral(ledger, collateral_value)
+            .add_collateral(ledger, collateral_value, entry_timestamp, timestamp)
     }
 
     for borrowed in borroweds {
-        let pool = borrowed.pool;
-        let asset = borrowed.asset;
+        let pool = &borrowed.pool;
+        let asset = &borrowed.asset;
         let borrowed_value = borrowed.borrowed;
         let ledger = borrowed.ledger;
-
         let entry_timestamp = borrowed.timestamp;
-        if entry_timestamp as i64 + DAY_TIMEFRAME > timestamp {
-            for (s_asset, s_volume) in volume_24hrs.iter_mut() {
-                if asset == *s_asset {
-                    *s_volume += borrowed.delta as u64
-                }
-            }
-        }
-
+ 
         aggregated_data
-        .entry(pool)
+        .entry(&pool)
         .or_insert_with(HashMap::new)
-        .entry(asset)
+        .entry(&asset)
         .or_insert_with(AggregatedData::new)
-            .add_borrowed(ledger, borrowed_value)
+            .add_borrowed(ledger, borrowed_value, entry_timestamp, timestamp)
     }
 
-    (aggregated_data, volume_24hrs)
+    aggregated_data
 }
 
-pub fn build_dashboard(env: &EnvClient, aggregated_data: HashMap<String, HashMap<String, AggregatedData>>, volume: Vec<(String, u64)>, collaterals: Vec<Collateral>, borroweds: Vec<Borrowed>) -> Dashboard {
-    let mut dashboard = Dashboard::new();
+pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, HashMap<&'a str, AggregatedData>>, collaterals: &Vec<Collateral>, borroweds: &Vec<Borrowed>) -> Dashboard {
+    let mut dashboard = Dashboard::new().entry(DashboardEntry::new().title("Welcome to Blend's Dashboard").table(Table::new().columns(vec!["Instruction".into()]).row(vec!["Have fun!".into()]).row(vec!["(Built with Mercury and Zephyr)".into()]).row(vec!["https://github.com/xycloo/zephyr-examples/tree/master/zephyr-blend-mainnet-dashboard".into()])));
     let categories: Vec<String> = vec!["Supply".into(), "Collateral".into(), "Borrowed".into()];
-
-    let volumes_table = {
-        let mut table = Table::new().columns(vec!["Asset".into(), "Volume".into()]);
-
-        for (asset, volume) in volume {
-            let meta: StellarAssetContractMetadata = env.from_scval(&get_from_instance(env, asset, "METADATA"));
-            let asset = soroban_string_to_string(env, meta.name);
-            let denom = soroban_string_to_string(env, meta.symbol);
-
-            table = table.row(vec![asset, format!("{} {}", volume / STROOP as u64, denom)]);
-        }
-
-        DashboardEntry::new().title("24 Hours Volume By Asset").table(table)
-    };
-
-    dashboard = dashboard.entry(volumes_table);
 
     for (pool, assets) in aggregated_data {
         let auctions_table = {
-            let mut table = Table::new().columns(vec!["type".into(), "block".into(), "user".into(), "bid".into(), "lot".into()]);
-            for entry in get_from_ledger(env, pool.clone()) {
-                let user = entry.0.user;
-                let atype = auction_from_u32(entry.0.auct_type);
-                let data: AuctionData = env.from_scval(&entry.1);
-
-                table = table.row(vec![atype, data.block.to_string(), soroban_string_to_string(env, user.to_string()), serde_json::to_string(&env.to_scval(data.bid)).unwrap(), serde_json::to_string(&env.to_scval(data.lot)).unwrap()]);
-            }
-
-            DashboardEntry::new().title("Current Auctions").table(table)
+            let positions_count = get_from_ledger(env, &pool);
+            let table = Table::new().columns(vec!["count".into()]).row(vec![positions_count.to_string()]);
+            DashboardEntry::new().title("Current Unique Users With Positions").table(table)
         };
 
         dashboard = dashboard.entry(auctions_table);
@@ -182,6 +138,7 @@ pub fn build_dashboard(env: &EnvClient, aggregated_data: HashMap<String, HashMap
         for (asset, data) in assets {
             let meta: StellarAssetContractMetadata = env.from_scval(&get_from_instance(env, asset, "METADATA"));
             let asset = soroban_string_to_string(env, meta.name);
+            let denom = soroban_string_to_string(env, meta.symbol);
             
             env.log().debug("got asset", None);
 
@@ -218,7 +175,13 @@ pub fn build_dashboard(env: &EnvClient, aggregated_data: HashMap<String, HashMap
                 DashboardEntry::new().title("Borrwed supply evolution").chart(chart)
             };
 
-            dashboard = dashboard.entry(bar).entry(collateral).entry(borrowed);
+
+            let volume = {
+                let table = Table::new().columns(vec!["Volume".into()]).row(vec![format!("{} {}", data.volume_24hrs as u64 / STROOP as u64, denom)]);
+                DashboardEntry::new().title(format!("{} pool {} 24hrs volume", pool, asset)).table(table)
+            };
+
+            dashboard = dashboard.entry(volume).entry(bar).entry(collateral).entry(borrowed);
         }
     }
 
@@ -233,7 +196,7 @@ pub fn build_dashboard(env: &EnvClient, aggregated_data: HashMap<String, HashMap
                 ("repay".into(), ((entry.delta as u128) as i64).to_string())
             };
 
-            table = table.row(vec![kind, entry.timestamp.to_string(), entry.ledger.to_string(), entry.pool, entry.asset, entry.source, amount]);
+            table = table.row(vec![kind, entry.timestamp.to_string(), entry.ledger.to_string(), entry.pool.to_string(), entry.asset.to_string(), entry.source.to_string(), amount]);
         }
         
         let actions = DashboardEntry::new().title("Borrow Actions").table(table);
@@ -251,7 +214,7 @@ pub fn build_dashboard(env: &EnvClient, aggregated_data: HashMap<String, HashMap
                 ("withdraw".into(), ((entry.delta as u128) as i64).to_string())
             };
 
-            table = table.row(vec![kind, entry.timestamp.to_string(), entry.ledger.to_string(), entry.pool, entry.asset, entry.source, amount]);
+            table = table.row(vec![kind, entry.timestamp.to_string(), entry.ledger.to_string(), entry.pool.to_string(), entry.asset.to_string(), entry.source.to_string(), amount]);
         }
         
         let actions = DashboardEntry::new().title("Collateral Actions").table(table);
