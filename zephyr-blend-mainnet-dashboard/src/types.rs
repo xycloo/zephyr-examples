@@ -6,6 +6,8 @@ use zephyr_sdk::{
     }, DatabaseDerive, EnvClient
 };
 
+use crate::chart::DAY_TIMEFRAME;
+
 #[derive(Clone)]
 #[contracttype]
 pub struct UserReserveKey {
@@ -262,6 +264,7 @@ pub struct AggregatedData {
     pub total_borrowed: i128,
     pub total_supply: i128,
     pub total_collateral: i128,
+    pub volume_24hrs: u128
 }
 
 impl AggregatedData {
@@ -276,17 +279,27 @@ impl AggregatedData {
         self.supplied.push((ledger, value))
     }
 
-    pub fn add_collateral(&mut self, ledger: u32, value: i128) {
+    pub fn add_collateral(&mut self, ledger: u32, value: i128, entry_timestamp: u64, timestamp: i64) {
         if self.total_collateral < value {
             self.total_collateral = value
         };
+
+        if entry_timestamp as i64 + DAY_TIMEFRAME > timestamp {
+            self.volume_24hrs += value as u128
+        }
+
         self.collateral.push((ledger, value))
     }
 
-    pub fn add_borrowed(&mut self, ledger: u32, value: i128) {
+    pub fn add_borrowed(&mut self, ledger: u32, value: i128, entry_timestamp: u64, timestamp: i64) {
         if self.total_borrowed < value {
             self.total_borrowed = value
         };
+
+        if entry_timestamp as i64 + DAY_TIMEFRAME > timestamp {
+            self.volume_24hrs += value as u128
+        }
+
         self.borrowed.push((ledger, value))
     }
 }
