@@ -179,21 +179,13 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
 
 
             let day_volume = {
-                let table = Table::new().columns(vec!["Volume".into()]).row(vec![format!("{} {}", data.volume_24hrs as u64 / STROOP as u64, denom)]);
-                DashboardEntry::new().title(format!("{} pool {} 24hrs volume", pool, asset)).table(table)
+                let table = Table::new().columns(vec!["Timeframe".into(), "Volume".into()]).row(vec!["24hrs".into(), format!("{} {}", data.volume_24hrs as u64 / STROOP as u64, denom)])
+                .row(vec!["week".into(), format!("{} {}", data.volume_week as u64 / STROOP as u64, denom)])
+                .row(vec!["month".into(), format!("{} {}", data.volume_month as u64 / STROOP as u64, denom)]);
+                DashboardEntry::new().title(format!("{} pool {} volume", pool, asset)).table(table)
             };
 
-            let week_volume = {
-                let table = Table::new().columns(vec!["Volume".into()]).row(vec![format!("{} {}", data.volume_week as u64 / STROOP as u64, denom)]);
-                DashboardEntry::new().title(format!("{} pool {} 1 week volume", pool, asset)).table(table)
-            };
-
-            let month_volume = {
-                let table = Table::new().columns(vec!["Volume".into()]).row(vec![format!("{} {}", data.volume_month as u64 / STROOP as u64, denom)]);
-                DashboardEntry::new().title(format!("{} pool {} 1 month volume", pool, asset)).table(table)
-            };
-
-            dashboard = dashboard.entry(day_volume).entry(week_volume).entry(month_volume).entry(bar).entry(collateral).entry(borrowed);
+            dashboard = dashboard.entry(day_volume).entry(bar).entry(collateral).entry(borrowed);
         }
     }
 
