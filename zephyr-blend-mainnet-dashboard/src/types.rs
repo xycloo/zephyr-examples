@@ -6,7 +6,7 @@ use zephyr_sdk::{
     }, DatabaseDerive, EnvClient
 };
 
-use crate::chart::DAY_TIMEFRAME;
+use crate::chart::{DAY_TIMEFRAME, MONTH_TIMEFRAME, WEEK_TIMEFRAME};
 
 #[derive(Clone)]
 #[contracttype]
@@ -264,7 +264,9 @@ pub struct AggregatedData {
     pub total_borrowed: i128,
     pub total_supply: i128,
     pub total_collateral: i128,
-    pub volume_24hrs: u128
+    pub volume_24hrs: i128,
+    pub volume_week: i128,
+    pub volume_month: i128,
 }
 
 impl AggregatedData {
@@ -279,25 +281,41 @@ impl AggregatedData {
         self.supplied.push((ledger, value))
     }
 
-    pub fn add_collateral(&mut self, ledger: u32, value: i128, entry_timestamp: u64, timestamp: i64) {
+    pub fn add_collateral(&mut self, ledger: u32, value: i128, delta: i128, entry_timestamp: u64, timestamp: i64) {
         if self.total_collateral < value {
             self.total_collateral = value
         };
 
         if entry_timestamp as i64 + DAY_TIMEFRAME > timestamp {
-            self.volume_24hrs += value as u128
+            self.volume_24hrs += delta.abs()
+        }
+
+        if entry_timestamp as i64 + WEEK_TIMEFRAME > timestamp {
+            self.volume_week += delta.abs()
+        }
+
+        if entry_timestamp as i64 + MONTH_TIMEFRAME > timestamp {
+            self.volume_month += delta.abs()
         }
 
         self.collateral.push((ledger, value))
     }
 
-    pub fn add_borrowed(&mut self, ledger: u32, value: i128, entry_timestamp: u64, timestamp: i64) {
+    pub fn add_borrowed(&mut self, ledger: u32, value: i128, delta: i128, entry_timestamp: u64, timestamp: i64) {
         if self.total_borrowed < value {
             self.total_borrowed = value
         };
 
         if entry_timestamp as i64 + DAY_TIMEFRAME > timestamp {
-            self.volume_24hrs += value as u128
+            self.volume_24hrs += delta.abs()
+        }
+
+        if entry_timestamp as i64 + WEEK_TIMEFRAME > timestamp {
+            self.volume_week += delta.abs()
+        }
+
+        if entry_timestamp as i64 + MONTH_TIMEFRAME > timestamp {
+            self.volume_month += delta.abs()
         }
 
         self.borrowed.push((ledger, value))

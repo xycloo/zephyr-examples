@@ -9,6 +9,8 @@ use zephyr_sdk::{
 
 pub const STROOP: i128 = 10_000_000;
 pub const DAY_TIMEFRAME: i64 = 86_400;
+pub const WEEK_TIMEFRAME: i64 = DAY_TIMEFRAME * 7;
+pub const MONTH_TIMEFRAME: i64 = DAY_TIMEFRAME * 30;
 
 pub fn soroban_string_to_string(env: &EnvClient, string: SorobanString) -> String {
     let sc_val: ScVal = env.to_scval(string);
@@ -97,7 +99,7 @@ pub fn aggregate_data<'a>(
         .or_insert_with(HashMap::new)
         .entry(&asset)
         .or_insert_with(AggregatedData::new)
-            .add_collateral(ledger, collateral_value, entry_timestamp, timestamp)
+            .add_collateral(ledger, collateral_value, collateral.delta, entry_timestamp, timestamp)
     }
 
     for borrowed in borroweds {
@@ -112,7 +114,7 @@ pub fn aggregate_data<'a>(
         .or_insert_with(HashMap::new)
         .entry(&asset)
         .or_insert_with(AggregatedData::new)
-            .add_borrowed(ledger, borrowed_value, entry_timestamp, timestamp)
+            .add_borrowed(ledger, borrowed_value, borrowed.delta, entry_timestamp, timestamp)
     }
 
     aggregated_data
@@ -176,12 +178,22 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
             };
 
 
-            let volume = {
+            let day_volume = {
                 let table = Table::new().columns(vec!["Volume".into()]).row(vec![format!("{} {}", data.volume_24hrs as u64 / STROOP as u64, denom)]);
                 DashboardEntry::new().title(format!("{} pool {} 24hrs volume", pool, asset)).table(table)
             };
 
-            dashboard = dashboard.entry(volume).entry(bar).entry(collateral).entry(borrowed);
+            let week_volume = {
+                let table = Table::new().columns(vec!["Volume".into()]).row(vec![format!("{} {}", data.volume_week as u64 / STROOP as u64, denom)]);
+                DashboardEntry::new().title(format!("{} pool {} 1 week volume", pool, asset)).table(table)
+            };
+
+            let month_volume = {
+                let table = Table::new().columns(vec!["Volume".into()]).row(vec![format!("{} {}", data.volume_month as u64 / STROOP as u64, denom)]);
+                DashboardEntry::new().title(format!("{} pool {} 1 month volume", pool, asset)).table(table)
+            };
+
+            dashboard = dashboard.entry(day_volume).entry(week_volume).entry(month_volume).entry(bar).entry(collateral).entry(borrowed);
         }
     }
 

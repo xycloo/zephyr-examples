@@ -24,9 +24,7 @@ pub struct ResponseObject {
 fn soroban_string_to_string(env: &EnvClient, string: SorobanString) -> String {
     let sc_val: ScVal = env.to_scval(string);
     if let ScVal::String(ScString(s)) = sc_val {
-        let s = s.to_utf8_string().unwrap();
-        let parts: Vec<&str> = s.split(':').collect();
-        parts[0].into()
+        s.to_utf8_string().unwrap()
     } else {
         panic!("value is not a string");
     }
