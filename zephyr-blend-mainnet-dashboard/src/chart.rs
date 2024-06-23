@@ -15,15 +15,15 @@ pub const MONTH_TIMEFRAME: i64 = DAY_TIMEFRAME * 30;
 pub fn soroban_string_to_string(env: &EnvClient, string: SorobanString) -> String {
     let sc_val: ScVal = env.to_scval(string);
     if let ScVal::String(ScString(s)) = sc_val {
+        env.log().debug(format!("StringM {:?}", s), None);
         let s = s.to_utf8_string().unwrap();
-        let parts: Vec<&str> = s.split(':').collect();
-        parts[0].into()
+        s
     } else {
         panic!("value is not a string");
     }
 }
 
-fn get_from_instance(env: &EnvClient, contract: &str, str_: &str) -> ScVal {
+pub fn get_from_instance(env: &EnvClient, contract: &str, str_: &str) -> ScVal {
     let instance = env.read_contract_instance(stellar_strkey::Contract::from_string(&contract).unwrap().0).unwrap().unwrap();
     let LedgerEntryData::ContractData(data) = instance.entry.data else {
         panic!()
@@ -46,7 +46,6 @@ fn get_from_ledger(env: &EnvClient, contract: &str) -> i64 {
         let LedgerEntryData::ContractData(data) = entry.entry.data else {
             env.log().debug(format!("not contract data {:?}", entry.entry.data), None);
             panic!()};
-        env.log().debug(format!("key {:?}", entry.key), None);
         if let Ok(entry_key) = env.try_from_scval::<PoolDataKey>(&data.key) {
             match entry_key {
                 PoolDataKey::Positions(_) => {
@@ -121,7 +120,7 @@ pub fn aggregate_data<'a>(
 }
 
 pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, HashMap<&'a str, AggregatedData>>, collaterals: &Vec<Collateral>, borroweds: &Vec<Borrowed>) -> Dashboard {
-    let mut dashboard = Dashboard::new().entry(DashboardEntry::new().title("Welcome to Blend's Dashboard").table(Table::new().columns(vec!["Instruction".into()]).row(vec!["Have fun!".into()]).row(vec!["(Built with Mercury and Zephyr)".into()]).row(vec!["https://github.com/xycloo/zephyr-examples/tree/master/zephyr-blend-mainnet-dashboard".into()])));
+    let mut dashboard = Dashboard::new().title(&"Blend Porotocol Dashboard").description(&"Explore the Blend protocol's mainnet activity.").entry(DashboardEntry::new().title("Welcome to Blend's Dashboard").table(Table::new().columns(vec!["Instruction".into()]).row(vec!["Have fun!".into()]).row(vec!["(Built with Mercury and Zephyr)".into()]).row(vec!["https://github.com/xycloo/zephyr-examples/tree/master/zephyr-blend-mainnet-dashboard".into()])));
     let categories: Vec<String> = vec!["Supply".into(), "Collateral".into(), "Borrowed".into()];
 
     for (pool, assets) in aggregated_data {
@@ -137,12 +136,14 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
         let ScVal::String(string) = val else {panic!()};
         let pool = string.to_utf8_string().unwrap();
         
+        env.log().debug("Iterating over data", None);
+
         for (asset, data) in assets {
             let meta: StellarAssetContractMetadata = env.from_scval(&get_from_instance(env, asset, "METADATA"));
-            let asset = soroban_string_to_string(env, meta.name);
+//            let asset = soroban_string_to_string(env, meta.name);
             let denom = soroban_string_to_string(env, meta.symbol);
-            
-            env.log().debug("got asset", None);
+            let asset = denom.clone();
+
 
             let bar = {
                 let chart = Chart::new().legend(Legend::new().show(true).left("150px").top("3%")).tooltip(Tooltip::new().trigger(Trigger::Axis))

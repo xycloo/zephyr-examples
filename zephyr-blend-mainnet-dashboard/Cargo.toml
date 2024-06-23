@@ -16,7 +16,7 @@ charming-fork-zephyr = "0.3.1"
 #pool-factory = {git="https://github.com/blend-capital/blend-contracts"}
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "lib"]
 
 [profile.release]
 opt-level = "z"

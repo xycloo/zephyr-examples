@@ -69,7 +69,7 @@ pub enum PoolFactoryDataKey {
 
 #[derive(Clone)]
 #[contracttype]
-pub(crate) struct StellarAssetContractMetadata {
+pub struct StellarAssetContractMetadata {
     pub decimal: u32,
     pub name: SorobanString,
     pub symbol: SorobanString,

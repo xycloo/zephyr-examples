@@ -1,5 +1,5 @@
-mod chart;
-mod types;
+pub mod chart;
+pub mod types;
 
 use chart::{aggregate_data, build_dashboard, soroban_string_to_string, STROOP};
 use types::{Borrowed, Collateral, Common, PoolFactoryDataKey, Supply};
