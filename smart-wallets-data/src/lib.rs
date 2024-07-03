@@ -13,27 +13,30 @@ pub struct Signers {
 #[derive(DatabaseDerive, Clone, Serialize)]
 #[with_name("adjacent")]
 pub struct AdjacentEvents {
+    address: String,
     contract: String,
     topics: ScVal,
     data: ScVal,
 }
 
-fn to_store(existing_addresses: &Vec<String>, topics: &VecM<ScVal>, data: &ScVal) -> bool {
+fn to_store(existing_addresses: &Vec<String>, topics: &VecM<ScVal>, data: &ScVal) -> Vec<String> {
+    let mut addresses: Vec<String> = Vec::new();
+
     for topic in topics.to_vec() {
         for address in existing_addresses {
             if find_address_in_scval(&topic, stellar_strkey::Contract::from_string(&address).unwrap().0) {
-                return true
+                addresses.push(address.clone())
             }
         }
     }
 
     for address in existing_addresses {
         if find_address_in_scval(data, stellar_strkey::Contract::from_string(&address).unwrap().0) {
-            return true
+            addresses.push(address.clone())
         }
     }
 
-    false
+    addresses
 }
 
 fn find_address_in_scval(val: &ScVal, address: [u8; 32]) -> bool {
@@ -82,7 +85,9 @@ fn find_val() {
 
     let scval = ScVal::Vec(Some(ScVec([ScVal::Vec(Some(ScVec([ScVal::Address(ScAddress::Contract(Hash([3; 32])))].try_into().unwrap())))].try_into().unwrap())));
     assert!(find_address_in_scval(&scval, [3; 32]));
-    assert!(!find_address_in_scval(&scval, [2; 32]))
+    assert!(!find_address_in_scval(&scval, [2; 32]));
+
+    println!("{}", ScVal::Address(ScAddress::Contract(Hash(stellar_strkey::Contract::from_string("CBLWEW63G2KU7ZGVQTTFTJLGQSXAU5PU5ZXERQDDLL4LBA72D7ER6C75").unwrap().0))).to_xdr_base64(Limits::none()).unwrap());
 }
 
 fn bytes_to_vec(bytes: Bytes) -> Vec<u8> {
@@ -117,11 +122,14 @@ pub extern "C" fn on_close() {
         // This allows us to track all kinds of operations performed by the smart wallets (transfers, 
         // swaps, deposits, etc).
         {
-            if to_store(&existing_addresses, &event.topics, &event.data) {
+            let addresses = to_store(&existing_addresses, &event.topics, &event.data); 
+            
+            for address in addresses {
                 let event = AdjacentEvents {
                     contract: stellar_strkey::Contract(event.contract).to_string(),
                     topics: ScVal::Vec(Some(ScVec(event.topics.clone().try_into().unwrap()))),
-                    data: event.data.clone()
+                    data: event.data.clone(),
+                    address
                 };
 
                 env.put(&event)
@@ -169,7 +177,7 @@ pub extern "C" fn on_close() {
 }            
 
 #[derive(Deserialize)]
-pub struct SignersByAddressRequest {
+pub struct QueryByAddressRequest {
     address: String
 }
 
@@ -181,7 +189,7 @@ pub struct AddressBySignerRequest {
 #[no_mangle]
 pub extern "C" fn get_signers_by_address() {
     let env = EnvClient::empty();
-    let request: SignersByAddressRequest = env.read_request_body();
+    let request: QueryByAddressRequest = env.read_request_body();
     let signers: Vec<Signers> = env.read_filter().column_equal_to("address", request.address).column_equal_to("active", 0).read().unwrap();
 
     env.conclude(&signers)
@@ -194,4 +202,13 @@ pub extern "C" fn get_address_by_signer() {
     let signers: Vec<Signers> = env.read_filter().column_equal_to("id", request.id).column_equal_to("active", 0).read().unwrap();
 
     env.conclude(&signers)
+}
+
+#[no_mangle]
+pub extern "C" fn get_events_by_address() {
+    let env = EnvClient::empty();
+    let request: QueryByAddressRequest = env.read_request_body();
+    let events: Vec<AdjacentEvents> = env.read_filter().column_equal_to("contract", request.address).read().unwrap();
+
+    env.conclude(&events)
 }
