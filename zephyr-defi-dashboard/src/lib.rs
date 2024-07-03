@@ -304,7 +304,7 @@ pub extern "C" fn dashboard() {
             &stellar_strkey::Contract(asset_bytes.clone()).to_string(),
             "METADATA",
         ));
-        let asset = soroban_string_to_string(&env, meta.name);
+        let asset = soroban_string_to_string(&env, meta.symbol);
 
         volumes_table = volumes_table.row(vec![
             asset.clone(),
