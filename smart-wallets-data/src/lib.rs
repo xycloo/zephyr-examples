@@ -110,10 +110,7 @@ fn bytesn_to_vec(bytes: BytesN<65>) -> Vec<u8> {
 pub extern "C" fn on_close() {
     let env = EnvClient::new();
     let existing_addresses: Vec<String> = Signers::read_to_rows(&env, None).iter().map(|signer| signer.address.clone()).collect();
-
-    env.log().debug("Converting from str", None);
     let factory_address = SorobanString::from_str(&env.soroban(), "CA4JRRQ52GDJGWIWE7W6J4AUDGLYSEEUUYM4OXERVQ7AUFGS72YNIF65");
-    env.log().debug("Done", None);
 
     for event in env.reader().pretty().soroban_events() {
         // if there are events where the address of the wallet is involved in, we track them.
