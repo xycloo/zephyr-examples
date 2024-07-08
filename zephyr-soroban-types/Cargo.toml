@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#zephyr-sdk = { version = "0.1.1" }
-zephyr-sdk = { path = "../../rs-zephyr-sdk/zephyr-sdk" }
+zephyr-sdk = { version = "0.1.7" }
+#zephyr-sdk = { path = "../../rs-zephyr-sdk/zephyr-sdk" }
 colorglyph = { git = "https://github.com/Colorglyph/colorglyph-soroban/" }
 
 [lib]
