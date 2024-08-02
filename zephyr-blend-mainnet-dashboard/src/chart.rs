@@ -15,7 +15,6 @@ pub const MONTH_TIMEFRAME: i64 = DAY_TIMEFRAME * 30;
 pub fn soroban_string_to_string(env: &EnvClient, string: SorobanString) -> String {
     let sc_val: ScVal = env.to_scval(string);
     if let ScVal::String(ScString(s)) = sc_val {
-        env.log().debug(format!("StringM {:?}", s), None);
         let s = s.to_utf8_string().unwrap();
         s
     } else {
@@ -61,7 +60,7 @@ fn get_from_ledger(env: &EnvClient, contract: &str) -> i64 {
 
 pub fn aggregate_data<'a>(
     timestamp: i64,
-    supplies: &'a Vec<Supply>,
+    //supplies: &'a Vec<Supply>,
     collaterals: &'a Vec<Collateral>,
     borroweds: &'a Vec<Borrowed>,
 ) -> HashMap<&'a str, HashMap<&'a str, AggregatedData>> {
@@ -72,7 +71,7 @@ pub fn aggregate_data<'a>(
 
     env.log().debug("hashmaps", None);
 
-    for supply in supplies {
+    /*for supply in supplies.iter().rev().take(500) {
         let pool = &supply.pool;  // Convert pool to string for hashmap key
         let asset = &supply.asset;  // Convert asset to string for hashmap key
         let supply_value = supply.supply;
@@ -84,9 +83,9 @@ pub fn aggregate_data<'a>(
             .entry(&asset)
             .or_insert_with(AggregatedData::new)
             .add_supply(ledger, supply_value);
-    }
+    }*/
 
-    for collateral in collaterals {
+    for collateral in collaterals.iter().rev().take(800) {
         let pool = &collateral.pool;
         let asset = &collateral.asset;
         let collateral_value = collateral.clateral;
@@ -101,7 +100,7 @@ pub fn aggregate_data<'a>(
             .add_collateral(ledger, collateral_value, collateral.delta, entry_timestamp, timestamp)
     }
 
-    for borrowed in borroweds {
+    for borrowed in borroweds.iter().rev().take(800) {
         let pool = &borrowed.pool;
         let asset = &borrowed.asset;
         let borrowed_value = borrowed.borrowed;
@@ -120,7 +119,7 @@ pub fn aggregate_data<'a>(
 }
 
 pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, HashMap<&'a str, AggregatedData>>, collaterals: &Vec<Collateral>, borroweds: &Vec<Borrowed>) -> Dashboard {
-    let mut dashboard = Dashboard::new().title(&"Blend Porotocol Dashboard").description(&"Explore the Blend protocol's mainnet activity.").entry(DashboardEntry::new().title("Welcome to Blend's Dashboard").table(Table::new().columns(vec!["Instruction".into()]).row(vec!["Have fun!".into()]).row(vec!["(Built with Mercury and Zephyr)".into()]).row(vec!["https://github.com/xycloo/zephyr-examples/tree/master/zephyr-blend-mainnet-dashboard".into()])));
+    let mut dashboard = Dashboard::new().title(&"Blend Porotocol Dashboard").description(&"Explore the Blend protocol's mainnet activity. Since we're tracking an entire ecosystem, the dashboard's historical time-series data is not all-time (even though the indexed data is indeed all-time).").entry(DashboardEntry::new().title("Welcome to Blend's Dashboard").table(Table::new().columns(vec!["Instruction".into()]).row(vec!["Have fun!".into()]).row(vec!["(Built with Mercury and Zephyr)".into()]).row(vec!["https://github.com/xycloo/zephyr-examples/tree/master/zephyr-blend-mainnet-dashboard".into()])));
     let categories: Vec<String> = vec!["Supply".into(), "Collateral".into(), "Borrowed".into()];
 
     for (pool, assets) in aggregated_data {
@@ -152,9 +151,10 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
                 .name(format!("Pool: {}, Asset {}", pool, asset))
                 .data(vec![data.total_supply as i64 / STROOP as i64, data.total_collateral as i64 / STROOP as i64, data.total_borrowed as i64 / STROOP as i64]));
 
-                DashboardEntry::new().title("Distribution all time").chart(chart)
+                let test = DashboardEntry::new().title("Distribution all time").chart(chart);
+                
+                test
             };
-
             
             let collateral = {
                 let line_data: Vec<i64> = data.collateral.iter().map(|(_, value)| *value as i64 / STROOP as i64).collect();
@@ -194,7 +194,7 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
         let mut table = Table::new();
         table = table.columns(vec!["type".into(), "timestamp".into(), "ledger".into(), "pool".into(), "asset".into(), "source".into(), "amount".into()]);
 
-        for entry in borroweds {
+        for entry in borroweds.iter().rev().take(100) {
             let (kind, amount) = if entry.delta > 0 {
                 ("borrow".into(), ((entry.delta as u128) as i64).to_string())
             } else {
@@ -212,7 +212,7 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
         let mut table = Table::new();
         table = table.columns(vec!["type".into(), "timestamp".into(), "ledger".into(), "pool".into(), "asset".into(), "source".into(), "amount".into()]);
 
-        for entry in collaterals {
+        for entry in collaterals.iter().rev().take(100) {
             let (kind, amount) = if entry.delta > 0 {
                 ("supply".into(), ((entry.delta as u128) as i64).to_string())
             } else {
@@ -226,7 +226,8 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
         actions
     };
 
-    dashboard = dashboard.entry(borrow_table).entry(collateral_table);
+    env.log().debug("collateral table built", None);
+    dashboard = dashboard.entry(borrow_table).entry(collateral_table);    
 
     dashboard
 }
