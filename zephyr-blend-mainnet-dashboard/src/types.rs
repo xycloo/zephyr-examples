@@ -282,9 +282,7 @@ impl AggregatedData {
     }
 
     pub fn add_collateral(&mut self, ledger: u32, value: i128, delta: i128, entry_timestamp: u64, timestamp: i64) {
-        if self.total_collateral < value {
-            self.total_collateral = value
-        };
+        self.total_collateral = value;
 
         if entry_timestamp as i64 + DAY_TIMEFRAME > timestamp {
             self.volume_24hrs += delta.abs()
@@ -302,9 +300,7 @@ impl AggregatedData {
     }
 
     pub fn add_borrowed(&mut self, ledger: u32, value: i128, delta: i128, entry_timestamp: u64, timestamp: i64) {
-        if self.total_borrowed < value {
-            self.total_borrowed = value
-        };
+        self.total_borrowed = value;
 
         if entry_timestamp as i64 + DAY_TIMEFRAME > timestamp {
             self.volume_24hrs += delta.abs()

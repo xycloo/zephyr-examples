@@ -1,0 +1,12 @@
+name = "native-numeric-types"
+
+[[tables]]
+name = "testt"
+
+[[tables.columns]]
+name = "numberd"
+col_type = "bigint"
+
+[[tables.columns]]
+name = "other"
+col_type = "bytea"

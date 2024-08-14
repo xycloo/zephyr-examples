@@ -85,7 +85,7 @@ pub fn aggregate_data<'a>(
             .add_supply(ledger, supply_value);
     }*/
 
-    for collateral in collaterals.iter().rev().take(800) {
+    for collateral in collaterals.iter() {
         let pool = &collateral.pool;
         let asset = &collateral.asset;
         let collateral_value = collateral.clateral;
@@ -100,7 +100,7 @@ pub fn aggregate_data<'a>(
             .add_collateral(ledger, collateral_value, collateral.delta, entry_timestamp, timestamp)
     }
 
-    for borrowed in borroweds.iter().rev().take(800) {
+    for borrowed in borroweds.iter() {
         let pool = &borrowed.pool;
         let asset = &borrowed.asset;
         let borrowed_value = borrowed.borrowed;
@@ -119,7 +119,7 @@ pub fn aggregate_data<'a>(
 }
 
 pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, HashMap<&'a str, AggregatedData>>, collaterals: &Vec<Collateral>, borroweds: &Vec<Borrowed>) -> Dashboard {
-    let mut dashboard = Dashboard::new().title(&"Blend Porotocol Dashboard").description(&"Explore the Blend protocol's mainnet activity. Since we're tracking an entire ecosystem, the dashboard's historical time-series data is not all-time (even though the indexed data is indeed all-time).").entry(DashboardEntry::new().title("Welcome to Blend's Dashboard").table(Table::new().columns(vec!["Instruction".into()]).row(vec!["Have fun!".into()]).row(vec!["(Built with Mercury and Zephyr)".into()]).row(vec!["https://github.com/xycloo/zephyr-examples/tree/master/zephyr-blend-mainnet-dashboard".into()])));
+    let mut dashboard = Dashboard::new().title(&"Blend Porotocol Dashboard").description(&"Explore the Blend protocol's mainnet activity. Since we're tracking an entire ecosystem, the dashboard's historical time-series data is not all-time (even though the indexed data is indeed all-time).");//.entry(DashboardEntry::new().title("Welcome to Blend's Dashboard").table(Table::new().columns(vec!["Instruction".into()]).row(vec!["Have fun!".into()]).row(vec!["(Built with Mercury and Zephyr)".into()]).row(vec!["https://github.com/xycloo/zephyr-examples/tree/master/zephyr-blend-mainnet-dashboard".into()])));
     let categories: Vec<String> = vec!["Supply".into(), "Collateral".into(), "Borrowed".into()];
 
     for (pool, assets) in aggregated_data {
@@ -142,7 +142,6 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
 //            let asset = soroban_string_to_string(env, meta.name);
             let denom = soroban_string_to_string(env, meta.symbol);
             let asset = denom.clone();
-
 
             let bar = {
                 let chart = Chart::new().legend(Legend::new().show(true).left("150px").top("3%")).tooltip(Tooltip::new().trigger(Trigger::Axis))
@@ -194,7 +193,7 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
         let mut table = Table::new();
         table = table.columns(vec!["type".into(), "timestamp".into(), "ledger".into(), "pool".into(), "asset".into(), "source".into(), "amount".into()]);
 
-        for entry in borroweds.iter().rev().take(100) {
+        for entry in borroweds.iter().rev().take(10) {
             let (kind, amount) = if entry.delta > 0 {
                 ("borrow".into(), ((entry.delta as u128) as i64).to_string())
             } else {
@@ -204,7 +203,7 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
             table = table.row(vec![kind, entry.timestamp.to_string(), entry.ledger.to_string(), entry.pool.to_string(), entry.asset.to_string(), entry.source.to_string(), amount]);
         }
         
-        let actions = DashboardEntry::new().title("Borrow Actions").table(table);
+        let actions = DashboardEntry::new().title("Last Borrow Actions").table(table);
         actions
     };
 
@@ -212,7 +211,7 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
         let mut table = Table::new();
         table = table.columns(vec!["type".into(), "timestamp".into(), "ledger".into(), "pool".into(), "asset".into(), "source".into(), "amount".into()]);
 
-        for entry in collaterals.iter().rev().take(100) {
+        for entry in collaterals.iter().rev().take(10) {
             let (kind, amount) = if entry.delta > 0 {
                 ("supply".into(), ((entry.delta as u128) as i64).to_string())
             } else {
@@ -222,7 +221,7 @@ pub fn build_dashboard<'a>(env: &EnvClient, aggregated_data: HashMap<&'a str, Ha
             table = table.row(vec![kind, entry.timestamp.to_string(), entry.ledger.to_string(), entry.pool.to_string(), entry.asset.to_string(), entry.source.to_string(), amount]);
         }
         
-        let actions = DashboardEntry::new().title("Collateral Actions").table(table);
+        let actions = DashboardEntry::new().title("Last Collateral Actions").table(table);
         actions
     };
 

@@ -8,7 +8,7 @@ use charming_fork_zephyr::{
 };
 use zephyr_blend_dashboards::{
     chart::{get_from_instance, soroban_string_to_string},
-    types::StellarAssetContractMetadata,
+    types::{StellarAssetContractMetadata, Supply},
 };
 use zephyr_sdk::{
     charting::{Dashboard, DashboardEntry, Table},
@@ -214,10 +214,10 @@ impl AssetAggregation {
 pub extern "C" fn dashboard() {
     let env = EnvClient::empty();
     let blend_borrowed: Vec<Borrowed> = env.read();
+    env.log().debug("got blend borrowed", None);
     let blend_collateral: Vec<Collateral> = env.read();
+    env.log().debug("got blend clateral", None);
     let soroswap_events: Vec<EventsTable> = env.read();
-
-    env.log().debug("got all data", None);
 
     let mut map = HashMap::new();
     let current_timestamp = env.soroban().ledger().timestamp();
@@ -250,8 +250,6 @@ pub extern "C" fn dashboard() {
                 None,
             );
     }
-
-    env.log().debug("Soroswap events", None);
 
     for borrow in blend_borrowed {
         let asset_scval = ScVal::Address(ScAddress::Contract(Hash(

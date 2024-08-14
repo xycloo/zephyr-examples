@@ -105,7 +105,7 @@ pub extern "C" fn on_close() {
 
 
 #[no_mangle]
-pub extern "C" fn dashboard() {
+pub extern "C" fn dasdhboard() {
     let env = EnvClient::empty();
     env.log().debug("Starting program", None);
     let dasboard = {
