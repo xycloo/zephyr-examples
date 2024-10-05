@@ -1,13 +1,19 @@
 use urlencoding::encode;
 use zephyr_sdk::{
-    prelude::*, soroban_sdk::{
+    prelude::*,
+    soroban_sdk::{
         self, map, vec,
-        xdr::{self, Limits, Transaction, TransactionEnvelope, TransactionExt, TransactionV1Envelope, WriteXdr},
-        Address, BytesN, IntoVal, Map, Symbol, Val, 
-    }, utils::{
+        xdr::{
+            self, Limits, Transaction, TransactionEnvelope, TransactionExt, TransactionV1Envelope,
+            WriteXdr,
+        },
+        Address, BytesN, IntoVal, Map, Symbol, Val,
+    },
+    utils::{
         add_contract_to_footprint, address_from_str, build_authorization_preimage, ed25519_sign,
-        sha256, sign_transaction, soroban_string_to_alloc_string
-    }, AgnosticRequest, EnvClient, PrettyContractEvent
+        sha256, sign_transaction, soroban_string_to_alloc_string,
+    },
+    AgnosticRequest, EnvClient, PrettyContractEvent,
 };
 
 // Note: these small fee adjustements are needed because:
@@ -64,48 +70,41 @@ pub extern "C" fn on_close() {
     }
 }
 
+#[derive(Clone)]
+#[contracttype]
+pub struct Request {
+    pub request_type: u32,
+    pub address: Address,
+    pub amount: i128,
+}
+
 fn execute_transaction(env: &EnvClient) {
     let account = stellar_strkey::ed25519::PublicKey::from_string(&SOURCE_ACCOUNT)
         .unwrap()
         .0;
     let contract = stellar_strkey::Contract::from_string(&CONTRACT).unwrap().0;
-
     let sequence = env
         .read_account_from_ledger(account)
         .unwrap()
         .unwrap()
         .seq_num;
 
-        env.log().debug("Got sequence", None);
+    let blend_request = Request {
+        request_type: 2,
+        address: Address::from_string(&zephyr_sdk::soroban_sdk::String::from_str(
+            &env.soroban(),
+            "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+        )),
+        amount: 100_000_000
+    }
 
-    let map: Map<Symbol, Val> = map![
-        &env.soroban(),
-        (
-            Symbol::new(&env.soroban(), "request_type"),
-            2_u32.into_val(env.soroban()),
-        ),
-        (
-            Symbol::new(&env.soroban(), "address"),
-            Address::from_string(&zephyr_sdk::soroban_sdk::String::from_str(
-                &env.soroban(),
-                "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
-            ))
-            .into_val(env.soroban()),
-        ),
-        (
-            Symbol::new(&env.soroban(), "amount"),
-            100_000_000_i128.into_val(env.soroban()),
-        )
-    ];
-    
     let args: soroban_sdk::Vec<Val> = vec![
         &env.soroban(),
         address_from_str(env, ACCOUNT).into_val(env.soroban()),
         address_from_str(env, ACCOUNT).into_val(env.soroban()),
         address_from_str(env, ACCOUNT).into_val(env.soroban()),
-        vec![&env.soroban(), map].into_val(env.soroban()),
+        vec![&env.soroban(), blend_request].into_val(env.soroban()),
     ];
-
     let tx = env.simulate_contract_call_to_tx(
         SOURCE_ACCOUNT.into(),
         sequence as i64 + 1,
@@ -113,18 +112,15 @@ fn execute_transaction(env: &EnvClient) {
         Symbol::new(&env.soroban(), "submit"),
         args,
     );
-    
-    if tx.clone().unwrap().error.is_some() {
-        env.log().debug(format!("{:?}", tx.clone().unwrap().error), None);
-    } else {
 
+    if tx.clone().unwrap().error.is_some() {
+        env.log()
+            .debug(format!("{:?}", tx.clone().unwrap().error), None);
+    } else {
         let mut tx_with_signed_auth = sign_auth_entries(
             env,
             TransactionEnvelope::from_xdr_base64(tx.unwrap().tx.unwrap(), Limits::none()).unwrap(),
         );
-
-        env.log().debug("signed", None);
-
         let TransactionExt::V1(mut v1ext) = tx_with_signed_auth.ext else {
             panic!()
         };

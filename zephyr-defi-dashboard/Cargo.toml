@@ -8,8 +8,8 @@ edition = "2021"
 [dependencies]
 zephyr-sdk = { version = "0.1.7" }
 #zephyr-sdk = { path = "../../rs-zephyr-sdk/zephyr-sdk" }
-serde = {version = "1.0", features = ["derive"]}
-zephyr-blend-dashboards = {path = "../zephyr-blend-mainnet-dashboard"}
+serde = { version = "1.0", features = ["derive"] }
+zephyr-blend-dashboards = { path = "../zephyr-blend-mainnet-dashboard" }
 stellar-strkey = "0.0.8"
 charming-fork-zephyr = "0.3.1"
 

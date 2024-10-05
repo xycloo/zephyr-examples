@@ -1,0 +1,22 @@
+[package]
+name = "defi-positions"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zephyr-sdk = { version = "0.1.7" }
+serde = {version = "1", features = ["derive"]}
+stellar-strkey = "0.0.8" 
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true

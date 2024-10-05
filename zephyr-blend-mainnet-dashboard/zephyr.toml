@@ -1,1 +1,73 @@
 name = "zephyr-blend-dashboards"
+
+
+[[indexes]]
+
+name = "clateral"
+title = "Blend ecosystem collateral indexes"
+description = """
+Index of the whole Blend ecosystem historical collateral actions (deposit,
+withdraw) as well as total supply by action.
+"""
+instructions = """
+Import the collateral table as follows in your Mercury program:
+
+```rust
+#[derive(DatabaseDerive, Clone)]
+#[with_name("clateral")]
+#[external("35")]
+pub struct Collateral {
+    pub id: i64,
+    pub timestamp: u64,
+    pub ledger: u32,
+    pub pool: String,
+    pub asset: String,
+    pub clateral: i128,
+    pub delta: i128,
+    pub source: String,
+}
+```
+"""
+
+tags = ["blend", "defi", "collateral", "lending", "deposit"]
+
+
+[[indexes]]
+
+name = "borrowed"
+title = "Blend ecosystem borrows indexes"
+description = """
+Index of the whole Blend ecosystem historical borrow actions (borrow,
+repay) as well as total supply by action.
+"""
+instructions = """
+Import the borrow table as follows in your Mercury program:
+
+```rust
+#[derive(DatabaseDerive, Clone)]
+#[with_name("borrowed")]
+#[external("35")]
+pub struct Borrowed {
+    pub id: i64,
+    pub timestamp: u64,
+    pub ledger: u32,
+    pub pool: String,
+    pub asset: String,
+    pub borrowed: i128,
+    pub delta: i128,
+    pub source: String,
+}
+```
+
+"""
+tags = ["blend", "defi", "borrow"]
+
+
+[dashboard]
+
+title = "Blend ecosystem dashboard"
+description = """
+Tracks historical actions, volumes and supply evolution of all assets
+and all pools in the Blend ecosystem.
+"""
+tags = ["blend", "defi", "lending", "borrowing"]
