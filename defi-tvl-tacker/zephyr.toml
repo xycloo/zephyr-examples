@@ -1,0 +1,66 @@
+name = "defi-tvl-tacker"
+
+[[tables]]
+name = "defiopids"
+force = false
+
+[[tables.columns]]
+name = "current"
+col_type = "BIGINT"
+
+[[tables.columns]]
+name = "contract"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "asset"
+col_type = "BYTEA"
+
+
+[[tables]]
+name = "sacdefiop"
+force = false
+
+[[tables.columns]]
+name = "sac"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "t_count"
+col_type = "BIGINT"
+
+[[tables.columns]]
+name = "t_volume"
+col_type = "BIGINT"
+
+[[tables.columns]]
+name = "t_tvl"
+col_type = "BIGINT"
+
+[[tables.columns]]
+name = "target"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "amount"
+col_type = "BIGINT"
+
+[[tables.columns]]
+name = "operation"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "tx"
+col_type = "BYTEA"
+
+[[tables.columns]]
+name = "ledger"
+col_type = "BIGINT"
+
+[[tables.columns]]
+name = "timestamp"
+col_type = "BIGINT"
+
+[[tables.columns]]
+name = "id"
+col_type = "BIGINT"
